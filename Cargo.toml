@@ -1,0 +1,16 @@
+[package]
+name = "rs-bezier-curves"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+path = "src/bin.rs"
+name = "bezier_curves"
+
+[lib]
+name = "bezier_curves"
+path = "src/lib.rs"
+
+[dependencies]
