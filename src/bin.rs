@@ -37,4 +37,5 @@ fn main() {
     ];
     let curve = GenericBezierCurve::new(points);
     println!("{:?}", curve);
+    println!("{:?}", curve.get_tangent_along_curve(0.00).unwrap());
 }

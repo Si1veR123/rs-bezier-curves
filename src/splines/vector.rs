@@ -5,6 +5,14 @@ pub struct Vector<const DIM: usize, DType = f64> {
     pub data: [DType; DIM]
 }
 
+pub trait VectorLength<const DIM: usize> {
+    fn length(&self) -> f64;
+}
+
+pub trait VectorNormalise<const DIM: usize>: VectorLength<DIM> {
+    fn normalise(&self) -> Option<Vector<DIM>>;
+}
+
 // ADD DTYPE TO ALL VALUES
 impl<const DIM: usize, DType> Add<DType> for Vector<DIM, DType>
     where DType: From<u8> + Copy + Add<DType, Output = DType>,
@@ -34,6 +42,39 @@ impl<const DIM: usize, DType> Mul<DType> for Vector<DIM, DType>
         Self { data: new_arr }
     }
 }
+
+
+impl<const DIM: usize, DType> VectorLength<DIM> for Vector<DIM, DType>
+    where DType: Mul<DType, Output = DType> + Copy + Into<f64>
+    {
+    fn length(&self) -> f64 {
+        let mut square_sum = 0f64;
+        for d in &self.data {
+            let d_f64: f64 = d.clone().into();
+            square_sum += d_f64*d_f64
+        }
+        square_sum.sqrt()
+    }
+}
+
+
+impl<const DIM: usize, DType> VectorNormalise<DIM> for Vector<DIM, DType> 
+    where DType: Mul<DType, Output = DType> + Copy + Into<f64> + PartialOrd
+    {
+    fn normalise(&self) -> Option<Vector<DIM, f64>> {
+        let length = self.length();
+        if length == 0.0 {
+            return None
+        }
+        let mut new_arr: [f64; DIM] = [0.0; DIM];
+        for (i, old_val) in self.data.iter().cloned().enumerate() {
+            let old_val_f: f64 = old_val.into();
+            new_arr[i] = (old_val_f/length).into();
+        }
+        Some( Vector { data: new_arr } )
+    }
+}
+
 
 #[allow(dead_code)]
 impl<const DIM: usize, DType> Vector<DIM, DType> 

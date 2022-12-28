@@ -1,6 +1,6 @@
 use std::ops::Mul;
 
-use super::vector::Vector;
+use super::vector::{Vector, VectorNormalise};
 use super::maths::{factorial, differentiate_coefficients, evaluate_polynomial};
 use super::control_point::ControlPoint;
 
@@ -36,6 +36,7 @@ fn generate_coefficients<const DIM: usize>(points: &Vec<Vector<DIM>>) -> Vec<Vec
 
 pub trait BezierCurve<const DIM: usize> {
     fn get_point_along_curve(&self, t: f64) -> Option<Vector<DIM>>;
+    fn get_derivative_along_curve(&self, order: usize, t: f64) -> Option<Vector<DIM>>;
     fn get_tangent_along_curve(&self, t: f64) -> Option<Vector<DIM>>;
 }
 
@@ -58,9 +59,16 @@ impl<const DIM: usize> BezierCurve<DIM> for GenericBezierCurve<DIM> {
         Some(evaluate_polynomial(&self.coefficients, t))
     }
 
+    fn get_derivative_along_curve(&self, order: usize, t: f64) -> Option<Vector<DIM>> {
+        let mut differentiated_coefficients: Vec<Vector<DIM>> = vec![];
+        for _o in 0..order-1 {
+            differentiated_coefficients = differentiate_coefficients(&self.coefficients);
+        }
+        Some(evaluate_polynomial(&differentiated_coefficients, t).normalise()?)
+    }
+
     fn get_tangent_along_curve(&self, t: f64) -> Option<Vector<DIM>> {
-        let differentiated_polynomial = differentiate_coefficients(&self.coefficients);
-        Some(evaluate_polynomial(&differentiated_polynomial, t))
+        self.get_derivative_along_curve(2, t)
     }
 }
 
@@ -140,10 +148,15 @@ impl<const DIM: usize> BezierCurve<DIM> for GenericBezierSpline<DIM> {
         let curve = self.curves.get(curve_index)?;
         Some(curve.get_point_along_curve(curve_relative_t)?)
     }
-    fn get_tangent_along_curve(&self, t: f64) -> Option<Vector<DIM>> {
+
+    fn get_derivative_along_curve(&self, order: usize, t: f64) -> Option<Vector<DIM>> {
         let (curve_index, curve_relative_t) = self.get_curve_relative_t(t);
         let curve = self.curves.get(curve_index)?;
-        Some(curve.get_tangent_along_curve(curve_relative_t)?)
+        Some(curve.get_derivative_along_curve(order, curve_relative_t)?)
+    }
+
+    fn get_tangent_along_curve(&self, t: f64) -> Option<Vector<DIM>> {
+        self.get_derivative_along_curve(2, t)
     }
 }
 
