@@ -5,7 +5,7 @@ pub struct Vector<const DIM: usize, DType = f64> {
     pub data: [DType; DIM]
 }
 
-// ADD NTYPE TO ALL VALUES
+// ADD DTYPE TO ALL VALUES
 impl<const DIM: usize, DType> Add<DType> for Vector<DIM, DType>
     where DType: From<u8> + Copy + Add<DType, Output = DType>,
     {
@@ -20,7 +20,7 @@ impl<const DIM: usize, DType> Add<DType> for Vector<DIM, DType>
     }
 }
 
-// MULTIPLY NTYPE BY ALL VALUES
+// MULTIPLY DTYPE BY ALL VALUES
 impl<const DIM: usize, DType> Mul<DType> for Vector<DIM, DType>
     where DType: From<u8> + Copy + Mul<DType, Output = DType>,
     {
@@ -35,6 +35,7 @@ impl<const DIM: usize, DType> Mul<DType> for Vector<DIM, DType>
     }
 }
 
+#[allow(dead_code)]
 impl<const DIM: usize, DType> Vector<DIM, DType> 
     where DType: From<u8> + Copy + Add<DType, Output = DType> + Mul<DType, Output = DType>
     {

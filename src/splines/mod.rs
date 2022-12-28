@@ -15,18 +15,25 @@ pub struct GenericSpline<const DIM: usize> {
     pub curves: Vec<Box<dyn BezierCurve<DIM>>>
 }
 
+#[allow(dead_code)]
 impl<const DIM: usize> GenericSpline<DIM> {
     pub fn from_curves(curves: Vec<Box<dyn BezierCurve<DIM>>>) -> Self {
         Self {curves}
     }
 
     pub fn cubic_from_points(points: &Vec<Vector<DIM>>) -> Option<Self> {
+        // pattern of points is [control point1, handle, handle, control point2, handle, handle, control point3 ...]
+        if (points.len()-1)%3 != 0 {
+            return None
+        }
+
         let mut curves = vec![];
-        for curve_index in 0..points.len()-3 {
-            let point1 = points.get(curve_index)?.clone();
-            let point2 = points.get(curve_index+1)?.clone();
-            let point3 = points.get(curve_index+2)?.clone();
-            let point4 = points.get(curve_index+3)?.clone();
+        for curve_index in 0..(points.len()-1)/3 {
+            let start_index = curve_index*3;
+            let point1 = points.get(start_index)?.clone();
+            let point2 = points.get(start_index+1)?.clone();
+            let point3 = points.get(start_index+2)?.clone();
+            let point4 = points.get(start_index+3)?.clone();
             
             let curve = Box::new(GenericBezierCurve::new(vec![point1, point2, point3, point4])) as Box<dyn BezierCurve<DIM>>;
             curves.push(curve);
